@@ -12,9 +12,14 @@
 #include <string.h>
 
 
-static INT32U PCLK_F = 28756299;
+static INT32U PCLK_F = 28800000;
 
-
+DWORD GetWeekDay(DWORD Day, DWORD Month, DWORD Year)
+{
+	if(Month<3)
+		Month += 12;
+	return (Day+2*Month+3*(Month+1)/5+Year+Year/4-Year/100+Year/400+1)%7;
+}
 void Time_Display(INT16S FT_Color, INT16S BG_Color)
 {
 	int digYear   = RTC_YEAR;
@@ -62,13 +67,13 @@ void Time_Display(INT16S FT_Color, INT16S BG_Color)
 	
 	switch(digWday)
 	{
-		case 0 : strcpy(strWday,"Mon"); break;
-		case 1 : strcpy(strWday,"Tue"); break;
-		case 2 : strcpy(strWday,"Wed"); break;
-		case 3 : strcpy(strWday,"Thu"); break;
-		case 4 : strcpy(strWday,"Fri"); break;
-		case 5 : strcpy(strWday,"Sat"); break;
-		case 6 : strcpy(strWday,"Sun"); break;
+		case 1 : strcpy(strWday,"Mon"); break;
+		case 2 : strcpy(strWday,"Tue"); break;
+		case 3 : strcpy(strWday,"Wed"); break;
+		case 4 : strcpy(strWday,"Thu"); break;
+		case 5 : strcpy(strWday,"Fri"); break;
+		case 6 : strcpy(strWday,"Sat"); break;
+		case 0 : strcpy(strWday,"Sun"); break;
 	}
 	
 	
@@ -255,33 +260,533 @@ INT8U Game(void)
 	}	
 }
 
+
+void Menu_Option(void)
+{
+	#define DATE_X 15
+	#define DATE_Y 60
+	#define TIME_X 30
+	#define TIME_Y 110
+	#define KB_X 160
+	#define KB_Y 25
+	#define R 10
+	
+	Cursor strCursor;
+	Cursor cDD1,cDD2,cMM1,cMM2,cYY1,cYY2,cYY3,cYY4,cHR1,cHR2,cMN1,cMN2,cSE1,cSE2;
+	RTCTime Time;
+	char DD[3] = {0},MM[3] = {0},YY[5] = {0},HR[3] = {0},MN[3] = {0},SE[3] = {0};
+		
+	touchscreen_data TD;
+	INT8U index = 0, del_t = 0;
+	char num[2] = {0};
+	
+	/* GUI */
+	Lcd_ClearScr(320,240,WHITE);
+	putarea(DATE_X,DATE_X+10,DATE_Y,DATE_Y+20,LIGHT_BLUE);	// Day
+	putarea(DATE_X+15,DATE_X+25,DATE_Y,DATE_Y+20,LIGHT_BLUE);
+	putarea(DATE_X+35,DATE_X+45,DATE_Y,DATE_Y+20,LIGHT_BLUE);	// Month
+	putarea(DATE_X+50,DATE_X+60,DATE_Y,DATE_Y+20,LIGHT_BLUE);
+	putarea(DATE_X+70,DATE_X+80,DATE_Y,DATE_Y+20,LIGHT_BLUE);	// Year
+	putarea(DATE_X+85,DATE_X+95,DATE_Y,DATE_Y+20,LIGHT_BLUE);
+	putarea(DATE_X+100,DATE_X+110,DATE_Y,DATE_Y+20,LIGHT_BLUE);
+	putarea(DATE_X+115,DATE_X+125,DATE_Y,DATE_Y+20,LIGHT_BLUE);
+	
+	strCursor = Set_Cursor(DATE_X+1,DATE_Y-18);
+	GLCD_printf("D", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+16,DATE_Y-18);
+	GLCD_printf("D", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+36,DATE_Y-18);
+	GLCD_printf("M", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+51,DATE_Y-18);
+	GLCD_printf("M", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+71,DATE_Y-18);
+	GLCD_printf("Y", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+86,DATE_Y-18);
+	GLCD_printf("Y", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+101,DATE_Y-18);
+	GLCD_printf("Y", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+116,DATE_Y-18);
+	GLCD_printf("Y", BLACK,WHITE,strCursor);
+	
+	putarea(TIME_X,TIME_X+10,TIME_Y,TIME_Y+20,LIGHT_BLUE);	// Hour
+	putarea(TIME_X+15,TIME_X+25,TIME_Y,TIME_Y+20,LIGHT_BLUE);
+	putarea(TIME_X+35,TIME_X+45,TIME_Y,TIME_Y+20,LIGHT_BLUE);	// Minute
+	putarea(TIME_X+50,TIME_X+60,TIME_Y,TIME_Y+20,LIGHT_BLUE);
+	putarea(TIME_X+70,TIME_X+80,TIME_Y,TIME_Y+20,LIGHT_BLUE);	// Second
+	putarea(TIME_X+85,TIME_X+95,TIME_Y,TIME_Y+20,LIGHT_BLUE);
+	
+	strCursor = Set_Cursor(TIME_X+1,TIME_Y-18);
+	GLCD_printf("h", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(TIME_X+16,TIME_Y-18);
+	GLCD_printf("h", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(TIME_X+36,TIME_Y-18);
+	GLCD_printf("m", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(TIME_X+51,TIME_Y-18);
+	GLCD_printf("m", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(TIME_X+71,TIME_Y-18);
+	GLCD_printf("s", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(TIME_X+86,TIME_Y-18);
+	GLCD_printf("s", BLACK,WHITE,strCursor);
+	
+	
+	cDD1 = Set_Cursor(DATE_X+1,DATE_Y+2);
+	cDD2 = Set_Cursor(DATE_X+16,DATE_Y+2);
+	cMM1 = Set_Cursor(DATE_X+36,DATE_Y+2);
+	cMM2 = Set_Cursor(DATE_X+51,DATE_Y+2);
+	cYY1 = Set_Cursor(DATE_X+71,DATE_Y+2);
+	cYY2 = Set_Cursor(DATE_X+86,DATE_Y+2);
+	cYY3 = Set_Cursor(DATE_X+101,DATE_Y+2);
+	cYY4 = Set_Cursor(DATE_X+116,DATE_Y+2);
+	cHR1 = Set_Cursor(TIME_X+1,TIME_Y+2);
+	cHR2 = Set_Cursor(TIME_X+16,TIME_Y+2);
+	cMN1 = Set_Cursor(TIME_X+36,TIME_Y+2);
+	cMN2 = Set_Cursor(TIME_X+51,TIME_Y+2);
+	cSE1 = Set_Cursor(TIME_X+71,TIME_Y+2);
+	cSE2 = Set_Cursor(TIME_X+86,TIME_Y+2);
+	
+	
+	strCursor = Set_Cursor(DATE_X+27, DATE_Y+2);
+	GLCD_printf("/", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(DATE_X+62, DATE_Y+2);
+	GLCD_printf("/", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(TIME_X+27, TIME_Y+2);
+	GLCD_printf(":", BLACK,WHITE,strCursor);
+	strCursor = Set_Cursor(TIME_X+62, TIME_Y+2);
+	GLCD_printf(":", BLACK,WHITE,strCursor);
+	
+	
+	
+	GLCD_RoundRect(KB_X,KB_X+40,KB_Y,KB_Y+40,R,BLACK);					// Button: 1
+	GLCD_RoundRect(KB_X+50,KB_X+90,KB_Y,KB_Y+40,R,BLACK);				// Button: 2
+	GLCD_RoundRect(KB_X+100,KB_X+140,KB_Y,KB_Y+40,R,BLACK);			// Button: 3
+	
+	GLCD_RoundRect(KB_X,KB_X+40,KB_Y+50,KB_Y+90,R,BLACK);				// Button: 4
+	GLCD_RoundRect(KB_X+50,KB_X+90,KB_Y+50,KB_Y+90,R,BLACK);		// Button: 5
+	GLCD_RoundRect(KB_X+100,KB_X+140,KB_Y+50,KB_Y+90,R,BLACK);	// Button: 6
+	
+	GLCD_RoundRect(KB_X,KB_X+40,KB_Y+100,KB_Y+140,R,BLACK);			// Button: 7
+	GLCD_RoundRect(KB_X+50,KB_X+90,KB_Y+100,KB_Y+140,R,BLACK);	// Button: 8
+	GLCD_RoundRect(KB_X+100,KB_X+140,KB_Y+100,KB_Y+140,R,BLACK);// Button: 9
+	
+	GLCD_RoundRect(KB_X,KB_X+40,KB_Y+150,KB_Y+190,R,BLACK);			// Button: OK
+	GLCD_RoundRect(KB_X+50,KB_X+90,KB_Y+150,KB_Y+190,R,BLACK);	// Button: 0
+	GLCD_RoundRect(KB_X+100,KB_X+140,KB_Y+150,KB_Y+190,R,BLACK);// Button: DEL
+	
+	GLCD_RoundRect(TIME_X,TIME_X+95,KB_Y+150,KB_Y+190,R,RED);// Button: EXIT
+	
+	strCursor = Set_Cursor(KB_X+16, KB_Y+12);
+	GLCD_printf("1", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+66, KB_Y+12);
+	GLCD_printf("2", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+116, KB_Y+12);
+	GLCD_printf("3", WHITE,BLACK,strCursor);
+	
+	strCursor = Set_Cursor(KB_X+16, KB_Y+62);
+	GLCD_printf("4", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+66, KB_Y+62);
+	GLCD_printf("5", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+116, KB_Y+62);
+	GLCD_printf("6", WHITE,BLACK,strCursor);
+	
+	strCursor = Set_Cursor(KB_X+16, KB_Y+112);
+	GLCD_printf("7", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+66, KB_Y+112);
+	GLCD_printf("8", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+116, KB_Y+112);
+	GLCD_printf("9", WHITE,BLACK,strCursor);
+	
+	strCursor = Set_Cursor(KB_X+13, KB_Y+162);
+	GLCD_printf("OK", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+66, KB_Y+162);
+	GLCD_printf("0", WHITE,BLACK,strCursor);
+	strCursor = Set_Cursor(KB_X+109, KB_Y+162);
+	GLCD_printf("DEL", WHITE,BLACK,strCursor);
+	
+	strCursor = Set_Cursor(TIME_X+32, KB_Y+162);
+	GLCD_printf("EXIT", WHITE,RED,strCursor);
+	
+	while(1)
+	{
+		delayMs(500);
+		while(1)
+		{
+			TD = GetTS();
+			if(TD.pvalue != 0 && TD.xvalue > KB_X && TD.xvalue < KB_X+40 && TD.yvalue > KB_Y && TD.yvalue < KB_Y+40)	// Button: 1
+			{
+				num[0] = '1';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+50 && TD.xvalue < KB_X+90 && TD.yvalue > KB_Y && TD.yvalue < KB_Y+40)	// Button: 2
+			{
+				num[0] = '2';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+100 && TD.xvalue < KB_X+140 && TD.yvalue > KB_Y && TD.yvalue < KB_Y+40)	// Button: 3
+			{
+				num[0] = '3';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X && TD.xvalue < KB_X+40 && TD.yvalue > KB_Y+50 && TD.yvalue < KB_Y+90)	// Button: 4
+			{
+				num[0] = '4';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+50 && TD.xvalue < KB_X+90 && TD.yvalue > KB_Y+50 && TD.yvalue < KB_Y+90)	// Button: 5
+			{
+				num[0] = '5';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+100 && TD.xvalue < KB_X+140 && TD.yvalue > KB_Y+50 && TD.yvalue < KB_Y+90)	// Button: 6
+			{
+				num[0] = '6';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X && TD.xvalue < KB_X+40 && TD.yvalue > KB_Y+100 && TD.yvalue < KB_Y+140)	// Button: 7
+			{
+				num[0] = '7';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+50 && TD.xvalue < KB_X+90 && TD.yvalue > KB_Y+100 && TD.yvalue < KB_Y+140)	// Button: 8
+			{
+				num[0] = '8';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+100 && TD.xvalue < KB_X+140 && TD.yvalue > KB_Y+100 && TD.yvalue < KB_Y+140)	// Button: 9
+			{
+				num[0] = '9';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X && TD.xvalue < KB_X+40 && TD.yvalue > KB_Y+150 && TD.yvalue < KB_Y+190)	// Button: OK
+			{
+				Time.RTC_Mday = atoi(DD);
+				Time.RTC_Mon = atoi(MM);
+				Time.RTC_Year = atoi(YY);
+				Time.RTC_Hour = atoi(HR);
+				Time.RTC_Min = atoi(MN);
+				Time.RTC_Sec = atoi(SE);
+				Time.RTC_Wday = GetWeekDay(Time.RTC_Mday,Time.RTC_Mon,Time.RTC_Year);
+				RTCSetTime(Time);
+				RTCInit();
+				RTCStart();
+				return;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+50 && TD.xvalue < KB_X+90 && TD.yvalue > KB_Y+150 && TD.yvalue < KB_Y+190)	// Button: 0
+			{
+				num[0] = '0';
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > KB_X+100 && TD.xvalue < KB_X+140 && TD.yvalue > KB_Y+150 && TD.yvalue < KB_Y+190)	// Button: DEL
+			{
+				del_t = 1;
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > TIME_X && TD.xvalue < TIME_X+95 && TD.yvalue > KB_Y+150 && TD.yvalue < KB_Y+190)	// Button: DEL
+			{
+				return;
+			}
+		}
+		
+		
+		switch(index)
+		{
+			case 0:
+			{
+				if(!del_t)
+				{
+					DD[0] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cDD1);
+					index++;
+				}
+				else
+				{
+					del_t = 0;
+				}
+				break;
+			}
+			case 1:
+			{
+				if(!del_t)
+				{
+					DD[1] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cDD2);
+					index++;
+				}
+				else
+				{
+					DD[0] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cDD1);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 2:
+			{
+				if(!del_t)
+				{
+					MM[0] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cMM1);
+					index++;
+				}
+				else
+				{
+					DD[1] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cDD2);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 3:
+			{
+				if(!del_t)
+				{
+					MM[1] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cMM2);
+					index++;
+				}
+				else
+				{
+					MM[0] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cMM1);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 4:
+			{
+				if(!del_t)
+				{
+					YY[0] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cYY1);
+					index++;
+				}
+				else
+				{
+					MM[1] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cMM2);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 5:
+			{
+				if(!del_t)
+				{
+					YY[1] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cYY2);
+					index++;
+				}
+				else
+				{
+					YY[0] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cYY1);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 6:
+			{
+				if(!del_t)
+				{
+					YY[2] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cYY3);
+					index++;
+				}
+				else
+				{
+					YY[1] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cYY2);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 7:
+			{
+				if(!del_t)
+				{
+					YY[3] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cYY4);
+					index++;
+				}
+				else
+				{
+					YY[2] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cYY3);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 8:
+			{
+				if(!del_t)
+				{
+					HR[0] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cHR1);
+					index++;
+				}
+				else
+				{
+					YY[3] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cYY4);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 9:
+			{
+				if(!del_t)
+				{
+					HR[1] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cHR2);
+					index++;
+				}
+				else
+				{
+					HR[0] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cHR1);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 10:
+			{
+				if(!del_t)
+				{
+					MN[0] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cMN1);
+					index++;
+				}
+				else
+				{
+					HR[1] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cHR2);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 11:
+			{
+				if(!del_t)
+				{
+					MN[1] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cMN2);
+					index++;
+				}
+				else
+				{
+					MN[0] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cMN1);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 12:
+			{
+				if(!del_t)
+				{
+					SE[0] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cSE1);
+					index++;
+				}
+				else
+				{
+					MN[1] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cMN2);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 13:
+			{
+				if(!del_t)
+				{
+					SE[1] = num[0];
+					GLCD_printf(num,WHITE,LIGHT_BLUE,cSE2);
+					index++;
+				}
+				else
+				{
+					SE[0] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cSE1);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+			case 14:
+			{
+				if(!del_t)
+				{
+					break;
+				}
+				else
+				{
+					SE[1] = '0';
+					GLCD_printf(" ",WHITE,LIGHT_BLUE,cSE2);
+					index--;
+					del_t = 0;
+				}
+				break;
+			}
+		}
+	}
+}
+
 /***************************
 main menu
 ***************************/
-INT8U Menu_Main(void)
+void Menu_Main(void)
 {
 	Cursor strCursor;
-	touchscreen_data TouchData;
+	touchscreen_data TD;
+	Start_Animation();
 	
-	/* Draw patterns */
-	Lcd_ClearScr(320,240,0xffff);
-	putarea(0, 319, 0, 16, BLACK);
-	strCursor = Set_Cursor(40,138);
-	GLCD_Ellipsoid(20, 100, 105, 185, 0x0000);
-	GLCD_printf("START", 0xffff, 0x0000, strCursor);
-	strCursor = Set_Cursor(142,140);
-	GLCD_printf("Super Reaction Timer", 0x0000, 0xffff, strCursor);
-	strCursor = Set_Cursor(7,220);
-	GLCD_printf("Authors: C.Gao, Z.Y.Fu, H.Zhang, T.Zhu", 0x0000, 0xffff, strCursor);
-	Logo();
-	
-	/* Detect touch */
 	while(1)
 	{
-		Time_Display(WHITE, BLACK);
-		TouchData = GetTS();
-		if(TouchData.pvalue != 0 && TouchData.xvalue > 20 && TouchData.xvalue < 100 && TouchData.yvalue > 105 && TouchData.yvalue < 185)
-			return 1;
+		/* Draw patterns */
+		Lcd_ClearScr(320,240,WHITE);
+		putarea(0, 278, 0, 16, BLACK);
+		putarea(279, 319, 0, 16, RED);
+		strCursor = Set_Cursor(40,138);
+		GLCD_Ellipsoid(20, 100, 105, 185, BLACK);
+		GLCD_printf("START", WHITE, BLACK, strCursor);
+		strCursor = Set_Cursor(142,140);
+		GLCD_printf("Super Reaction Timer", BLACK, WHITE, strCursor);
+		strCursor = Set_Cursor(7,220);
+		GLCD_printf("Authors: C.Gao, Z.Y.Fu, H.Zhang, T.Zhu", BLACK, WHITE, strCursor);
+		strCursor = Set_Cursor(279,0);
+		GLCD_printf("SETUP", WHITE, RED, strCursor);
+		Logo();
+	
+		/* Detect touch */
+		while(1)
+		{
+			Time_Display(WHITE, BLACK);
+			TD = GetTS();
+			if(TD.pvalue != 0 && TD.xvalue > 20 && TD.xvalue < 100 && TD.yvalue > 105 && TD.yvalue < 185)
+			{
+				delayMs(500);
+				Menu_GameMode();
+				break;
+			}
+			else if(TD.pvalue != 0 && TD.xvalue > 270 && TD.xvalue < 320 && TD.yvalue > 0 && TD.yvalue < 20)
+			{
+				delayMs(500);
+				Menu_Option();
+				break;
+			}
+		}
 	}
 }
 
@@ -292,7 +797,7 @@ player menu
 INT8U Menu_Player(void)
 {
 	Cursor strCursor;
-	touchscreen_data TouchData;
+	touchscreen_data TD;
 
 	/* Draw patterns */
 	Lcd_ClearScr(320,240,WHITE);
@@ -318,25 +823,25 @@ INT8U Menu_Player(void)
 	/* Detect touch */
 	while(1)
 	{
-		TouchData = GetTS();
-		if(TouchData.pvalue != 0 && TouchData.xvalue > 135 && TouchData.xvalue < 185 && TouchData.yvalue > 95 && TouchData.yvalue < 145)
+		TD = GetTS();
+		if(TD.pvalue != 0 && TD.xvalue > 135 && TD.xvalue < 185 && TD.yvalue > 95 && TD.yvalue < 145)
 			return 0;
-		if(TouchData.pvalue != 0 && TouchData.xvalue > 40 && TouchData.xvalue < 140 && TouchData.yvalue > 40 && TouchData.yvalue < 100)
+		if(TD.pvalue != 0 && TD.xvalue > 40 && TD.xvalue < 140 && TD.yvalue > 40 && TD.yvalue < 100)
 			return 2;
-		if(TouchData.pvalue != 0 && TouchData.xvalue > 40 && TouchData.xvalue < 140 && TouchData.yvalue > 140 && TouchData.yvalue < 200)
+		if(TD.pvalue != 0 && TD.xvalue > 40 && TD.xvalue < 140 && TD.yvalue > 140 && TD.yvalue < 200)
 			return 4;
-		if(TouchData.pvalue != 0 && TouchData.xvalue > 180 && TouchData.xvalue < 280 && TouchData.yvalue > 40 && TouchData.yvalue < 100)
+		if(TD.pvalue != 0 && TD.xvalue > 180 && TD.xvalue < 280 && TD.yvalue > 40 && TD.yvalue < 100)
 			return 3;
-		if(TouchData.pvalue != 0 && TouchData.xvalue > 180 && TouchData.xvalue < 280 && TouchData.yvalue > 140 && TouchData.yvalue < 200)
+		if(TD.pvalue != 0 && TD.xvalue > 180 && TD.xvalue < 280 && TD.yvalue > 140 && TD.yvalue < 200)
 			return 5;
 	}
 }
 
 
-BOOL Menu_GameMode(void)
+void Menu_GameMode(void)
 {
 	Cursor strCursor;
-	touchscreen_data TouchData;
+	touchscreen_data TD;
 	
 	/* Detect touch */
 	while(1)
@@ -367,27 +872,27 @@ BOOL Menu_GameMode(void)
 		{
 			
 			Time_Display(WHITE, BLACK);
-			TouchData = GetTS();
-			if(TouchData.pvalue != 0 && TouchData.xvalue > 145 && TouchData.xvalue < 175 && TouchData.yvalue > 115 && TouchData.yvalue < 145)     /*Back*/     
+			TD = GetTS();
+			if(TD.pvalue != 0 && TD.xvalue > 145 && TD.xvalue < 175 && TD.yvalue > 115 && TD.yvalue < 145)     /*Back*/     
 			{
-				return 0;
+				return;
 			}
-			else if(TouchData.pvalue != 0 && TouchData.xvalue > 40 && TouchData.xvalue < 140 && TouchData.yvalue > 50 && TouchData.yvalue < 110)    /*Single player*/
+			else if(TD.pvalue != 0 && TD.xvalue > 40 && TD.xvalue < 140 && TD.yvalue > 50 && TD.yvalue < 110)    /*Single player*/
 			{
 				Menu_Single();
 				break;
 			}
-			else if(TouchData.pvalue != 0 && TouchData.xvalue > 180 && TouchData.xvalue < 280 && TouchData.yvalue > 50 && TouchData.yvalue < 110)  /*Multiple Players*/
+			else if(TD.pvalue != 0 && TD.xvalue > 180 && TD.xvalue < 280 && TD.yvalue > 50 && TD.yvalue < 110)  /*Multiple Players*/
 			{
 				Menu_Multiple(Menu_Player());
 				break;
 			}
-			else if(TouchData.pvalue != 0 && TouchData.xvalue > 40 && TouchData.xvalue < 140 && TouchData.yvalue > 150 && TouchData.yvalue < 210)  /*Menu_Calibrate*/
+			else if(TD.pvalue != 0 && TD.xvalue > 40 && TD.xvalue < 140 && TD.yvalue > 150 && TD.yvalue < 210)  /*Menu_Calibrate*/
 			{
 				Menu_Calibrate();
 				break;
 			}
-			else if(TouchData.pvalue != 0 && TouchData.xvalue > 180 && TouchData.xvalue < 280 && TouchData.yvalue > 150 && TouchData.yvalue < 210)  /*Menu_Calibrate*/
+			else if(TD.pvalue != 0 && TD.xvalue > 180 && TD.xvalue < 280 && TD.yvalue > 150 && TD.yvalue < 210)  /*Menu_Calibrate*/
 			{
 				Touch_Test();
 				break;
@@ -551,6 +1056,7 @@ void Menu_Calibrate(void)
 	char strPCLK[20];
 	char strTime[20];
 	Cursor strCursor1, strCursor2, buttonCursor1, buttonCursor2, buttonCursor3;
+	touchscreen_data TSD;
 
 	//while(GetTS().pvalue == 0);
   
@@ -584,44 +1090,46 @@ void Menu_Calibrate(void)
 	
 	while(1)
 	{
-		
+		TSD = GetTS_Fast();
 		GLCD_printf("0.00000000 s", BLACK, WHITE, strCursor1);
 		GLCD_printf("Run", WHITE, LIGHT_BLUE, buttonCursor1);
-		if(GetTS().pvalue != 0 && GetTS().xvalue > 60 && GetTS().xvalue < 140 && GetTS().yvalue > 130 && GetTS().yvalue < 210)
+		if(TSD.pvalue != 0 && TSD.xvalue > 60 && TSD.xvalue < 140 && TSD.yvalue > 130 && TSD.yvalue < 210)
 		{
 			Init_Timer();
 			Start_Timer();
 			GLCD_Ellipsoid(60, 140, 130, 210, RED);
 			GLCD_printf("Pause", WHITE, RED, buttonCursor2);
-			ts_settling_delay();
+			
 			
 			while(1)
 			{
 				T1TC_ABS = T1TC;
 				Time = T1TC_ABS/PCLK_F;
 				ftoa(strTime, Time, 8);
-				GLCD_printf_window(strTime, BLACK, WHITE, strCursor1, 10);
+				GLCD_printf(strTime, BLACK, WHITE, strCursor1);
 				GLCD_printf(" s", BLACK, WHITE, strCursor2);
-				if(GetTS().pvalue != 0 && GetTS().xvalue > 180 && GetTS().xvalue < 260 && GetTS().yvalue > 130 && GetTS().yvalue < 210)
+				TSD = GetTS_Fast();
+				if(TSD.pvalue != 0 && TSD.xvalue > 180 && TSD.xvalue < 260 && TSD.yvalue > 130 && TSD.yvalue < 210)
 					return;
-				else if(GetTS().pvalue != 0 && GetTS().xvalue > 60 && GetTS().xvalue < 140 && GetTS().yvalue > 130 && GetTS().yvalue < 210)
+				else if(TSD.pvalue != 0 && TSD.xvalue > 60 && TSD.xvalue < 140 && TSD.yvalue > 130 && TSD.yvalue < 210)
 					break;
 			}						
 			GLCD_Ellipsoid(60, 140, 130, 210, BLACK);
 			GLCD_printf("Reset", WHITE, BLACK, buttonCursor2);
-			ts_settling_delay();
+			//ts_settling_delay();
 			
 			while(1)
 			{
-				if(GetTS().pvalue != 0 && GetTS().xvalue > 180 && GetTS().xvalue < 260 && GetTS().yvalue > 130 && GetTS().yvalue < 210)
+				TSD = GetTS_Fast();
+				if(TSD.pvalue != 0 && TSD.xvalue > 180 && TSD.xvalue < 260 && TSD.yvalue > 130 && TSD.yvalue < 210)
 					return;
-				else if(GetTS().pvalue != 0 && GetTS().xvalue > 60 && GetTS().xvalue < 140 && GetTS().yvalue > 130 && GetTS().yvalue < 210)
+				else if(TSD.pvalue != 0 && TSD.xvalue > 60 && TSD.xvalue < 140 && TSD.yvalue > 130 && TSD.yvalue < 210)
 					break;
 			}
 			GLCD_Ellipsoid(60, 140, 130, 210, LIGHT_BLUE);	// Run button
-			ts_settling_delay();
+			//ts_settling_delay();
 		}
-		else if(GetTS().pvalue != 0 && GetTS().xvalue > 180 && GetTS().xvalue < 260 && GetTS().yvalue > 130 && GetTS().yvalue < 210)
+		else if(TSD.pvalue != 0 && TSD.xvalue > 180 && TSD.xvalue < 260 && TSD.yvalue > 130 && TSD.yvalue < 210)
 		{
 			break;
 		}

@@ -33,33 +33,33 @@ based on the table below. If you want to use USB, change "define USE_USB" from 0
 
 /* PLL Setting Table Matrix */
 /* 	
-	Main Osc.	CCLKCFG		Fcco		Fcclk 		M 	N
-	12Mhz		29		300Mhz		10Mhz		24	1
-	12Mhz		35		360Mhz		10Mhz		14	0					
-	12Mhz		27		336Mhz		12Mhz		13	0
-	12Mhz		14		300Mhz		20Mhz		24	1		
-	12Mhz		17		360Mhz		20Mhz		14	0
-	12Mhz		13		336Mhz		24Mhz		13	0
-	12Mhz		11		300Mhz		25Mhz		24	1   
-	12Mhz		9		300Mhz		30Mhz		24	1
-	12Mhz		11		360Mhz		30Mhz		14	0
-	12Mhz		9		320Mhz		32Mhz		39	2
-	12Mhz		9		350Mhz		35Mhz		174	11
-	12Mhz		7		312Mhz		39Mhz		12	0
- 	12Mhz		8		360Mhz		40Mhz		14	0 
-	12Mhz		7		360Mhz		45Mhz		14	0
-	12Mhz		6		336Mhz		48Mhz		13	0  
-	12Mhz		5		300Mhz		50Mhz		24	1
-	12Mhz		5		312Mhz		52Mhz		12	0
-	12Mhz		5		336Mhz		56Mhz		13	0		
- 	12Mhz		4		300Mhz		60Mhz		24	1		
-  	12Mhz		4		320Mhz		64Mhz		39	2
-	12Mhz		4		350Mhz		70Mhz		174	11
-	12Mhz		4		360Mhz		72Mhz		14	0		
-	12Mhz		3		300Mhz		75Mhz		24	1
-	12Mhz		3		312Mhz		78Mhz		12	0  
-	12Mhz		3		320Mhz		80Mhz		39	2
-	12Mhz		3		336Mhz		84Mhz		13	0 
+	Main Osc.	CCLKCFG		Fcco		Fcclk 	M 	N
+	12Mhz		  29		   300Mhz		10Mhz		24	1
+	12Mhz		  35		   360Mhz		10Mhz		14	0					
+	12Mhz		  27		   336Mhz		12Mhz		13	0
+	12Mhz		  14		   300Mhz		20Mhz		24	1		
+	12Mhz		  17		   360Mhz		20Mhz		14	0
+	12Mhz		  13		   336Mhz		24Mhz		13	0
+	12Mhz		  11		   300Mhz		25Mhz		24	1   
+	12Mhz		  9		     300Mhz		30Mhz		24	1
+	12Mhz		  11		   360Mhz		30Mhz		14	0
+	12Mhz		  9		     320Mhz		32Mhz		39	2
+	12Mhz		  9		     350Mhz		35Mhz		174	11
+	12Mhz		  7		     312Mhz		39Mhz		12	0
+ 	12Mhz		  8		     360Mhz		40Mhz		14	0 
+	12Mhz		  7		     360Mhz		45Mhz		14	0
+	12Mhz		  6		     336Mhz		48Mhz		13	0  
+	12Mhz		  5		     300Mhz		50Mhz		24	1
+	12Mhz		  5		     312Mhz		52Mhz		12	0
+	12Mhz		  5		     336Mhz		56Mhz		13	0		
+ 	12Mhz		  4		     300Mhz		60Mhz		24	1		
+  12Mhz	  	4		     320Mhz		64Mhz		39	2
+	12Mhz	  	4		     350Mhz		70Mhz		174	11
+	12Mhz	  	4		     360Mhz		72Mhz		14	0		
+	12Mhz	  	3		     300Mhz		75Mhz		24	1
+	12Mhz	  	3		     312Mhz		78Mhz		12	0  
+	12Mhz	  	3		     320Mhz		80Mhz		39	2
+	12Mhz	  	3		     336Mhz		84Mhz		13	0 
 */
 
 #if USE_USB		/* 1 is USB, 0 is non-USB related */  
@@ -76,8 +76,8 @@ based on the table below. If you want to use USB, change "define USE_USB" from 0
 /* System frequence,should be less than 80MHz. */
 #define Fcclk	57600000
 #define Fcco	288000000
-#else
 
+#else
 /* Fcck = 50Mhz, Fosc = 300Mhz, and USB 48Mhz */
 #define PLL_MValue			24
 #define PLL_NValue			1
@@ -87,7 +87,7 @@ based on the table below. If you want to use USB, change "define USE_USB" from 0
 
 /* System configuration: Fosc, Fcclk, Fcco, Fpclk must be defined */
 /* PLL input Crystal frequence range 4KHz~20MHz. */
-#define Fosc	12000000
+#define Fosc	12000000	// main oscilator 12MHz
 /* System frequence,should be less than 80MHz. */
 #define Fcclk	50000000
 #define Fcco	300000000

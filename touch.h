@@ -43,3 +43,4 @@ touchscreen_data	GetTS(void);
 void InitTS(touchscreen_data ts_resolution);
 void Touch_Test(void);	// Display the coordinates of the touched point on LCD (Gao)
 void ts_settling_delay(void);
+touchscreen_data	GetTS_Fast(void);

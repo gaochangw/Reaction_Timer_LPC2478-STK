@@ -90,7 +90,6 @@ INT32U invo(INT32U a,INT32U cnt);
 INT32S main(void)
 {
 	
-	RTCTime time1 = {0,05,15,21,2,2014,4,0};
 	/* Initialize low level of the Board */
 	low_level_init();	// Initialize PLL,RAM,GPIO..
 	UARTInit(115200);
@@ -120,41 +119,11 @@ INT32S main(void)
   /* Enable LCD */
   lcd_ioctl(dev_lcd, LCD_ENABLE, 1);
 	
-	RTCSetTime(time1);
   RTCInit();
 	RTCStart();
-	/*
-  Lcd_ClearScr(800,480,0x1f);//red
-  delayMs(1500);
-  Lcd_ClearScr(800,480,(0x1f<<5));//green
-  delayMs(1500);
-  Lcd_ClearScr(800,480,(0x1f<<10));//blue
-  delayMs(1500);
-  */
-  //Lcd_ClearScr(320, 240, 0xffff);//blue
-	//Animation();
-	//PutPicture(gImage_IMG00000);
-	//fillmosaic();
-	//GLCD_Ellipsoid(60, 200, 0, 90, 0x0000);
-	//myItoa(haha,disszf,10);
-	//strCursor = Set_strCursor(100,50);
-	//GLCD_printf(disszf,0xffff,strCursor);
-	//Lcd_ClearScr(320,240,0xFFFF);
-	//Menu_Calibrate();
 	
-	//GLCD_Triangle(50, 50, 100, 20, 200, 150, 0x0000);
-	//Start_Animation();
-	//Touch_Test();
-	while(1)
-	{
-		Start_Animation();
-		if(Menu_Main() == 1)
-		{
-			delayMs(500);
-			//Menu_Single();
-			Menu_GameMode();
-		}
-	}	
+	Menu_Main();
+	return 0;
 }
 
 /***********************************************************************

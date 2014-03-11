@@ -268,7 +268,7 @@ touchscreen_data	GetTS_Fast(void)
 		PINMODE1_bit->P0_23 = 0x02;
 		polarizeXx();
 		InitADC(TS_Y_CHANNEL);
-		ts_settling_delay();
+
 		samples[i*2].xvalue = GetADC(TS_Y_CHANNEL);
 		
 		FIO0DIR_bit->P0_22 = 0;
@@ -276,7 +276,7 @@ touchscreen_data	GetTS_Fast(void)
 		PINMODE1_bit->P0_24 = 0x02;
 		polarizeYy();
 		InitADC(TS_X_CHANNEL);
-		ts_settling_delay();
+	
 		samples[i*2].yvalue = GetADC(TS_X_CHANNEL);
 		
 		samples[i*2].pvalue = 0;
@@ -287,15 +287,14 @@ touchscreen_data	GetTS_Fast(void)
 		PINMODE1_bit->P0_23 = 0x02;
 		polarizexX();
 		InitADC(TS_Y_CHANNEL);
-		ts_settling_delay();
+	
 		samples[(i*2)+1].xvalue = GetADC(TS_Y_CHANNEL);
 		
 		FIO0DIR_bit->P0_22 = 0;
 		PINMODE1_bit->P0_22 = 0x02;
 		PINMODE1_bit->P0_24 = 0x02;
 		polarizeyY();
-		InitADC(TS_X_CHANNEL);
-		ts_settling_delay();
+		InitADC(TS_X_CHANNEL);ts_settling_delay();
 		samples[(i*2)+1].yvalue = GetADC(TS_X_CHANNEL);
 		
 		samples[(i*2)+1].pvalue = 0;

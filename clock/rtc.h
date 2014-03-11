@@ -47,7 +47,7 @@ typedef struct {
 #define ILR_RTCCIF	0x01
 #define ILR_RTCALF	0x02
 
-#define CCR_CLKEN	0x01
+#define CCR_CLKEN	0x11
 #define CCR_CTCRST	0x02
 #define CCR_CLKSRC	0x10
 

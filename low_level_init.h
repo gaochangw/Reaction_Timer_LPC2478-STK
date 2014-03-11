@@ -29,16 +29,11 @@
  *    12MHz     49         288MHz  5.76MHz  12  1
  **********************************************************************/
 #define PLL_MValue 11
-//#define PLL_MValue 14
-//#define PLL_MValue 11
+
 #define PLL_NValue 0
-//#define CCLKDivValue 3
+
 #define CCLKDivValue 4
-//#define CCLKDivValue 5
-//#define CCLKDivValue 4
-//#define CCLKDivValue 9
-//#define CCLKDivValue 24
-//#define CCLKDivValue 49
+
 void delayMs(INT32U delayInMs);
 void configure_pll(void);
 void configure_emc(void);

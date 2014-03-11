@@ -109,44 +109,39 @@ void GPIOResetInit( void )
  **********************************************************************/
 void configure_pll(void)
 {
-    INT16U MValue, NValue;
+	INT16U MValue, NValue;
 
-    if ((PLLSTAT&(0x04000000)))
-	//if ( PLLSTAT & (1 << 25) )
-    {
-		//PLLCON &= ~(1<<1);	   /* PLL disconnected */
-        PLLCON = 1;
+  if ((PLLSTAT&(0x04000000)))
+	{
+    PLLCON = 1;
 		PLLFEED = 0xaa;
-        PLLFEED = 0x55;
-    }
-
-     
-    PLLCON = 0;		/* PLL disabled */
-	PLLFEED = 0xaa;
     PLLFEED = 0x55;
+  }
+
+  PLLCON = 0;		/* PLL disabled */
+	PLLFEED = 0xaa;
+  PLLFEED = 0x55;
     
 	SCS|=(1<<5);  /* Enable main OSC */
-    while(!(SCS&0x40)); /* Wait until main OSC is usable */
-	// while( !(SCS & 0x40) );
-	//CLKSRCSEL &=0x0;
-	//CLKSRCSEL |=0x1;					/* select main OSC, 12MHz, as the PLL clock source */
-	CLKSRCSEL = 0x1;
+  while(!(SCS&0x40)); /* Wait until main OSC is usable */
+							
+	CLKSRCSEL = 0x1;	/* select main OSC, 12MHz, as the PLL clock source */
 
 	PLLCFG = PLL_MValue | (PLL_NValue << 16);
-    PLLFEED = 0xaa;
-    PLLFEED = 0x55;
+  PLLFEED = 0xaa;
+  PLLFEED = 0x55;
       
-	//PLLCON |=0x1;			/* PLL enabled */
-    PLLCON = 1;
+				
+  PLLCON = 1;	/* PLL enabled */
 	PLLFEED = 0xaa;
-    PLLFEED = 0x55;
+  PLLFEED = 0x55;
 
 	CCLKCFG = CCLKDivValue;	/* Set clock divider */
 
-   while ( ((PLLSTAT & (1 << 26)) == 0) );	/* Check lock bit status */
-	  MValue = (PLLSTAT&0x00007fff);
-	  NValue = ((PLLSTAT&0x00ff0000)>>16);
-    while ((MValue != PLL_MValue) && (NValue != PLL_NValue));
+  while ( ((PLLSTAT & (1 << 26)) == 0) );	/* Check lock bit status */
+	MValue = (PLLSTAT&0x00007fff);
+	NValue = ((PLLSTAT&0x00ff0000)>>16);
+  while ((MValue != PLL_MValue) && (NValue != PLL_NValue));
 
     //PLLCON |= (1<<1); /* PLL connected */
     PLLCON = 3;	
@@ -174,14 +169,14 @@ void configure_pll(void)
 void low_level_init(void)
 {
     /* Configure PLL, switch from IRC to Main OSC */
-    configure_pll();
+  configure_pll();
 	GPIOResetInit();
 
    // PCLKSEL0 = 0x00000000;	/* PCLK is 1/4 CCLK */
    // PCLKSEL1 = 0x00000000;
 
 	PCLKSEL0 = 0xAAAAAAAA;	/* PCLK is 1/2 CCLK */
-    PCLKSEL1 = 0xAAAAAAAA;
+  PCLKSEL1 = 0xAAAAAAAA;
 
 
     SDRAMInit();

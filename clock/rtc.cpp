@@ -41,20 +41,22 @@ RTCTime localtimebuf;
 *****************************************************************************/
 BOOL RTCInit( void )
 {
+	int f;
   rtc_alarm_on = 0;
 
   /*--- Initialize registers ---*/
   RTC_AMR = 0;          // 报警屏蔽
   RTC_CIIR = 0x1;         // 设置RTC产生秒增量中断，在中断服务程序中读取当前
                           //时钟信息。
-  RTC_CCR = 0;          // 使能复位
+  RTC_CCR = 0x0;          // 使能复位
 
   /*if ( install_irq( RTC_INT, (void *)RTCHandler,HIGHEST_PRIORITY ) == FALSE )
 	{
 	  return (FALSE);
 	}*/
-  RTC_PREINT = Fpclk/32768 - 1;   //预分频
-  RTC_PREFRAC = Fpclk % 32768;
+	//f = Fpclk;
+  //RTC_PREINT = Fpclk/32768 - 1;   //预分频
+  //RTC_PREFRAC = Fpclk % 32768;
 
   return TRUE;
 }
